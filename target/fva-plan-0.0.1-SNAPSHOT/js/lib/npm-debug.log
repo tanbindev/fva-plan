@@ -1,0 +1,69 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'handsontable' ]
+2 info using npm@2.15.1
+3 info using node@v4.4.3
+4 verbose install initial load of D:\newWork\workspace\fva-plan\src\main\webapp\js\lib\package.json
+5 verbose readDependencies loading dependencies from D:\newWork\workspace\fva-plan\src\main\webapp\js\lib\package.json
+6 silly cache add args [ 'handsontable', null ]
+7 verbose cache add spec handsontable
+8 silly cache add parsed spec Result {
+8 silly cache add   raw: 'handsontable',
+8 silly cache add   scope: null,
+8 silly cache add   name: 'handsontable',
+8 silly cache add   rawSpec: '',
+8 silly cache add   spec: 'latest',
+8 silly cache add   type: 'tag' }
+9 silly addNamed handsontable@latest
+10 verbose addNamed "latest" is being treated as a dist-tag for handsontable
+11 info addNameTag [ 'handsontable', 'latest' ]
+12 silly mapToRegistry name handsontable
+13 silly mapToRegistry using default registry
+14 silly mapToRegistry registry https://registry.npmjs.org/
+15 silly mapToRegistry data Result {
+15 silly mapToRegistry   raw: 'handsontable',
+15 silly mapToRegistry   scope: null,
+15 silly mapToRegistry   name: 'handsontable',
+15 silly mapToRegistry   rawSpec: '',
+15 silly mapToRegistry   spec: 'latest',
+15 silly mapToRegistry   type: 'tag' }
+16 silly mapToRegistry uri https://registry.npmjs.org/handsontable
+17 verbose addNameTag registry:https://registry.npmjs.org/handsontable not in flight; fetching
+18 verbose request uri https://registry.npmjs.org/handsontable
+19 verbose request no auth needed
+20 info attempt registry request try #1 at 11:50:47 AM
+21 verbose request id 53df91960245d9a9
+22 http request GET https://registry.npmjs.org/handsontable
+23 info retry will retry, error on last attempt: Error: connect ECONNREFUSED 151.101.76.162:443
+24 info attempt registry request try #2 at 11:50:58 AM
+25 http request GET https://registry.npmjs.org/handsontable
+26 info retry will retry, error on last attempt: Error: connect ECONNREFUSED 151.101.76.162:443
+27 info attempt registry request try #3 at 11:52:05 AM
+28 http request GET https://registry.npmjs.org/handsontable
+29 verbose stack Error: connect ECONNREFUSED 151.101.76.162:443
+29 verbose stack     at Object.exports._errnoException (util.js:870:11)
+29 verbose stack     at exports._exceptionWithHostPort (util.js:893:20)
+29 verbose stack     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1061:14)
+30 verbose cwd D:\newWork\workspace\fva-plan\src\main\webapp\js\lib
+31 error Windows_NT 6.1.7601
+32 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "handsontable"
+33 error node v4.4.3
+34 error npm  v2.15.1
+35 error code ECONNREFUSED
+36 error errno ECONNREFUSED
+37 error syscall connect
+38 error Error: connect ECONNREFUSED 151.101.76.162:443
+38 error     at Object.exports._errnoException (util.js:870:11)
+38 error     at exports._exceptionWithHostPort (util.js:893:20)
+38 error     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1061:14)
+38 error  { [Error: connect ECONNREFUSED 151.101.76.162:443]
+38 error   code: 'ECONNREFUSED',
+38 error   errno: 'ECONNREFUSED',
+38 error   syscall: 'connect',
+38 error   address: '151.101.76.162',
+38 error   port: 443 }
+39 error If you are behind a proxy, please make sure that the
+39 error 'proxy' config is set properly.  See: 'npm help config'
+40 verbose exit [ 1, true ]

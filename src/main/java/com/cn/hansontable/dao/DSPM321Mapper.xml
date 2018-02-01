@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cn.hansontable.dao.DSPM321Mapper" >
+  <!-- 获取DSPM321、DSPM20信息 -->
+    <!-- 可以显示指出列明,如果用"*"代替,则mybatis会自动匹配resultMap中提供的列名 -->
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="PM321APM20">
+        SELECT A.LNO,A.PLAN_SEQ PLAN_SEQ,A.OD_NO||'-'||A.OD_LOT OD_NO,A.OD_LQTY OD_LQTY,
+            A.CAP_HOUR CAP_HOUR,A.WK_HOURS WK_HOURS,A.ISLOCK ISLOCK,A.NEW_SHNO NEW_SHNO,A.PL_STATUS PL_STATUS,A.DIFF_ETD,
+            A.DIFF_ZCDATE,TO_CHAR(A.OS_EDATE,'YYYY/MM/DD') OS_EDATE,A.DIFF_OSDATE,TO_CHAR(C.OD_ACDAT,'YYYY/MM/DD') OD_ACDAT,H.DEST_NAME,
+            TO_CHAR(A.CX_BDATE,'YYYY/MM/DD') CX_BDATE,TO_CHAR(A.CX_EDATE,'YYYY/MM/DD') CX_EDATE,C.SH_ARITCLENO,
+            TO_CHAR(DECODE(C.OGAC,NULL,C.RGAC,C.OGAC),'YYYY/MM/DD') ETD,TO_CHAR(A.M_MDATE,'YYYY/MM/DD') M_MDATE,TO_CHAR(A.P_MDATE,'YYYY/MM/DD') P_MDATE,
+            C.SH_NO,C.SH_MODEL,TO_CHAR(A.MATE_DATE,'YYYY/MM/DD')MATE_DATE,C.SH_LAST
+            FROM DSPM321 A,DSPM32 B,DSPM20 C,DSPM07 D,DSPM08 E,DSPM16 F,DSPM16 G,DSPB07 H 
+            WHERE A.PNO=B.PNO AND A.LNO=B.LNO AND A.PNO=C.PNO(+) AND A.OD_NO=C.OD_NO(+) 
+            AND A.OD_LOT=C.OD_LOT(+) AND A.OD_NO=D.OD_NO(+) AND A.PNO=E.PNO(+) AND A.OD_NO=E.OD_NO(+) 
+            AND A.TOOL_ID1=F.TOOL_ID(+) AND A.TOOL_ID2=G.TOOL_ID(+) AND A.CU_DEST=H.CU_DEST(+)
+        <if test="PNO!=null and PNO!=''">
+        	AND A.PNO=#{PNO,jdbcType=VARCHAR}
+        </if>
+        <if test="LNO!=null and LNO!=''">
+        	AND A.LNO=#{LNO,jdbcType=VARCHAR}
+        </if>
+        <if test="SH_ARITCLENO!=null and SH_ARITCLENO!=''">
+        	AND B.SH_ARITCLENO LIKE #{SH_ARITCLENO,jdbcType=VARCHAR}
+        </if>
+        <if test="CX_EDATE!=null and CX_EDATE!=''">
+        	AND TO_CHAR(A.CX_EDATE,'YYYY/MM/DD')=#{CX_EDATE,jdbcType=VARCHAR}
+        </if>
+        <if test="PNO==null">
+        	AND A.PNO=(SELECT PNO FROM DSPM21 WHERE STATUS='1' AND PNO LIKE 'P%')
+        </if>
+        <if test="LNO == null">
+            AND A.LNO='1001'
+        </if>
+        ORDER BY A.LNO,A.PLAN_SEQ
+    </select>
+
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.DSPM321" id="PM321APM20">
+        <!-- property 表示DSPM321中的属性； column 表示表中的列名 -->
+        <id column="PNO" property="pno" jdbcType="VARCHAR" />
+    	<id column="OD_NO" property="odNo" jdbcType="VARCHAR" />
+        <result column="LNO" property="LNO" jdbcType="VARCHAR" />
+    	<result column="PLAN_SEQ" property="PLAN_SEQ" jdbcType="DOUBLE" />
+    	<result column="OD_LQTY" property="OD_LQTY" jdbcType="DOUBLE" />
+    	<result column="SH_ARITCLENO" property="SH_ARITCLENO" jdbcType="VARCHAR" />
+    	<result column="SH_NO" property="SH_NO" jdbcType="VARCHAR" />
+    	<result column="OD_ACDAT" property="OD_ACDAT" jdbcType="VARCHAR" />
+    	<result column="ETD" property="ETD" jdbcType="VARCHAR" />
+    	<result column="CX_BDATE" property="CX_BDATE" jdbcType="VARCHAR" />
+    	<result column="CX_EDATE" property="CX_EDATE" jdbcType="VARCHAR" />
+    	<result column="MATE_DATE" property="MATE_DATE" jdbcType="VARCHAR" />
+    	<result column="DIFF_ETD" property="DIFF_ETD" jdbcType="DOUBLE" />
+    	<result column="DIFF_ZCDATE" property="DIFF_ZCDATE" jdbcType="DOUBLE" />
+    	<result column="WK_HOURS" property="WK_HOURS" jdbcType="DOUBLE" />
+    	<result column="CAP_HOUR" property="CAP_HOUR" jdbcType="DOUBLE" />
+    	<result column="ISLOCK" property="ISLOCK" jdbcType="VARCHAR" />
+    	<result column="NEW_SHNO" property="NEW_SHNO" jdbcType="VARCHAR" />
+    	<result column="PL_STATUS" property="PL_STATUS" jdbcType="VARCHAR" />
+    	<result column="OS_EDATE" property="OS_EDATE" jdbcType="VARCHAR" />
+    	<result column="DIFF_OSDATE" property="DIFF_OSDATE" jdbcType="DOUBLE" />
+    	<result column="DEST_NAME" property="DEST_NAME" jdbcType="VARCHAR" />
+    	<result column="M_MDATE" property="M_MDATE" jdbcType="VARCHAR" />
+    	<result column="P_MDATE" property="P_MDATE" jdbcType="VARCHAR" />
+    	<result column="SH_MODEL" property="SH_MODEL" jdbcType="VARCHAR" />
+    	<result column="SH_LAST" property="SH_LAST" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="findPNO"  resultMap="Mpno">
+        SELECT PNO,STATUS,EX_PNO FROM DSPM21 WHERE  PNO LIKE'P%' ORDER BY PNO DESC
+    </select>
+    
+    <resultMap type="com.cn.hansontable.domain.PNO" id="Mpno">
+        <result column="PNO" property="PNO" jdbcType="VARCHAR" />
+        <result column="STATUS" property="STATUS" jdbcType="VARCHAR" />
+        <result column="EX_PNO" property="EX_PNO" jdbcType="VARCHAR" />
+    </resultMap>
+</mapper>

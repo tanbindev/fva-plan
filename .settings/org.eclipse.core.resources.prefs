@@ -1,0 +1,16 @@
+eclipse.preferences.version=1
+encoding//src/main/java/com/cn/hansontable/controller/PMDataController.java=UTF-8
+encoding//src/main/java/com/cn/hansontable/domain/DSSC08.java=UTF-8
+encoding//src/main/java/com/cn/hansontable/service/DSSC08Service.java=UTF-8
+encoding//src/main/java/com/cn/hansontable/service/PM321Service.java=UTF-8
+encoding//src/main/java/com/cn/hansontable/serviceImpl/DSSC08ServiceImpl.java=UTF-8
+encoding//src/main/java/com/cn/hansontable/serviceImpl/PM321ServiceImpl.java=UTF-8
+encoding//src/main/resources/jdbc.properties=UTF-8
+encoding//src/main/resources/log4j.properties=UTF-8
+encoding//src/main/webapp/css/lib/jquery.pagination.css=UTF-8
+encoding//src/main/webapp/js/charts.js=UTF-8
+encoding//src/main/webapp/js/lib/highcharts.js=UTF-8
+encoding//src/test/resources/jdbc.properties=UTF-8
+encoding//src/test/resources/log4j.properties=UTF-8
+encoding/<project>=UTF-8
+separateDerivedEncodings=true

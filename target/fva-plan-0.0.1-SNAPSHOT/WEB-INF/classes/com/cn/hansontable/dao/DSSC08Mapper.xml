@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cn.hansontable.dao.DSSC08Mapper" >
+    <select id="findLno" parameterType="String" resultMap="DSSC08">
+        SELECT DSPM321.LNO,DSSC08.LNAME,SUM(OD_LQTY) QTY FROM DSPM321,DSSC08
+		WHERE DSPM321.LNO=DSSC08.LNO 
+        <if test="PNO!=null and PNO!=''">
+        	AND PNO=#{PNO,jdbcType=VARCHAR}
+        </if>
+        <if test="PNO==null">
+        	AND PNO=(SELECT PNO FROM DSPM21 WHERE STATUS='1' AND PNO LIKE 'P%')
+        </if>
+        GROUP BY DSPM321.LNO,DSSC08.LNAME ORDER BY LNO
+    </select>
+
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.DSSC08" id="DSSC08">
+        <result column="LNO" property="LNO" jdbcType="VARCHAR" />
+    	<result column="LNAME" property="LNAME" jdbcType="VARCHAR" />
+    	<result column="QTY" property="QTY" jdbcType="DECIMAL" />
+    </resultMap>
+</mapper>

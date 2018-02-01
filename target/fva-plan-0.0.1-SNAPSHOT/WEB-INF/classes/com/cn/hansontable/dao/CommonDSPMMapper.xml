@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cn.hansontable.dao.CommonDSPMMapper" >
+    <select id="getSHOE_ID" parameterType="String" resultType="String">
+        SELECT SHOE_ID FROM DSPM121 WHERE SH_NO=#{SHNO,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getSC17Days"  resultType="Integer">
+        SELECT WK_T+WK_ADDT Hours FROM DSSC17 WHERE LINE_NO=#{LNO,jdbcType=VARCHAR} 
+        AND WK_DATE&gt;=TO_DATE(#{WKDATE1,jdbcType=VARCHAR},'YYYY/MM/DD')
+         AND WK_DATE&lt;=TO_DATE(#{WKDATE2,jdbcType=VARCHAR},'YYYY/MM/DD')
+          ORDER BY WK_DATE
+	</select>
+	
+	<delete id="deDSPM141">
+		DELETE DSPM141 WHERE 
+		PNO=#{PNO,jdbcType=VARCHAR}
+		AND LNO=#{LNO,jdbcType=VARCHAR} 
+		AND SHOE_ID=#{SHOE_ID,jdbcType=VARCHAR}  
+		AND P_TYPE='2' AND PROCID='59'
+	</delete>
+	
+	<delete id="deDSPM141A">
+		DELETE DSPM141 WHERE 
+		PNO=#{PNO,jdbcType=VARCHAR}
+		AND LNO=#{LNO,jdbcType=VARCHAR} 
+		AND P_TYPE='2' AND PROCID='59'
+	</delete>
+	
+	<insert id="inDSPM141">
+		INSERT INTO DSPM141(PNO,SHOE_ID,LNO,L_PCT,L_HOURS,UP_USER,UP_DATE,PROCID,P_TYPE,P_STATE,CXDATE)
+		Values(#{PNO,jdbcType=VARCHAR},#{SHOEID,jdbcType=VARCHAR},#{LNO,jdbcType=VARCHAR},#{LPCT,jdbcType=DECIMAL},
+		#{DAYS,jdbcType=DECIMAL},'DEV',sysdate,'59','2','',TO_DATE(#{CXEDATE,jdbcType=VARCHAR},'YYYY/MM/DD'))
+	</insert>
+	
+	<update id="updateDSPM141">
+		UPDATE DSPM141
+		<set>
+		L_PCT =#{LPCT,jdbcType=DOUBLE},L_HOURS=NVL(L_HOURS,0)+#{DAYS,jdbcType=DOUBLE},
+		CXDATE=TO_DATE(#{CXEDATE,jdbcType=VARCHAR},'YYYY/MM/DD'),UP_USER='DEV',UP_DATE=sysdate
+ 		</set>
+		WHERE
+		PNO =#{PNO,jdbcType=VARCHAR}
+		AND SHOE_ID =#{SHOEID,jdbcType=VARCHAR} 
+		AND LNO =#{LNO,jdbcType=VARCHAR} AND PROCID='59' AND P_TYPE='2'
+    </update>
+	
+	<select id="findCXDATE" resultMap="CXDATE">
+		SELECT TO_CHAR(A.CX_BDATE,'YYYY/MM/DD') CX_BDATE,TO_CHAR(A.CX_EDATE,'YYYY/MM/DD') CX_EDATE FROM 
+		DSPM321 A,DSPM20 B,DSPM21 C WHERE A.PNO=B.PNO AND A.OD_NO=B.OD_NO AND A.OD_LOT=B.OD_LOT AND B.PNO=C.PNO 
+		AND A.PNO=#{PNO,jdbcType=VARCHAR} AND B.SH_ARITCLENO IN(SELECT DSPM121.SH_NO FROM DSPM12,DSPM121 WHERE 
+		DSPM12.SHOE_ID=DSPM121.SHOE_ID AND DSPM12.SHOE_ID=#{SHOEID,jdbcType=VARCHAR} AND DSPM12.ISNEW='Y' 
+  		AND EXISTS(SELECT * FROM DSPM123 WHERE SHOE_ID=DSPM12.SHOE_ID AND LNO=#{LNO,jdbcType=VARCHAR})
+  		) AND A.LNO=#{LNO,jdbcType=VARCHAR} AND A.CX_BDATE&gt;=TO_DATE(C.BDATE,'YYYY/MM/DD') 
+   		AND A.CX_EDATE&lt;=TO_DATE(#{CXDATE,jdbcType=VARCHAR},'YYYY/MM/DD')  ORDER BY A.LNO,A.PLAN_SEQ
+	</select>
+	
+	<!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.CXDATE" id="CXDATE">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="CX_BDATE" property="CX_BDATE" jdbcType="VARCHAR" />
+    	<result column="CX_EDATE" property="CX_EDATE" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getPER"  resultType="Integer">
+        SELECT SUM(L_HOURS) L_HOURS FROM DSPM141 WHERE PROCID='59'
+         AND SHOE_ID=#{SHOEID,jdbcType=VARCHAR} AND LNO=#{LNO,jdbcType=VARCHAR} AND P_TYPE='2'
+	</select>
+	
+	<select id="getLPCT"  resultType="Integer">
+        SELECT NVL( ${field},-1)
+        FROM DSPM14 WHERE PROCID='59' AND SHOE_ID=#{SHOEID,jdbcType=VARCHAR}
+	</select>
+
+	<delete id="dePM321">
+		DELETE DSPM321 WHERE 
+		PNO=#{PNO,jdbcType=VARCHAR}
+		AND LNO=#{LNO,jdbcType=VARCHAR} 
+		AND NVL(OD_LQTY,0)&lt;0
+	</delete>
+	
+	<update id="updatePM321" parameterType="java.util.List">
+		<if test="list != null">
+		<foreach collection="list" item="item" index="index" open="begin"
+                 close=";end;" separator=";">
+		UPDATE DSPM321
+		<set>
+		PLAN_SEQ =#{item.PLAN_SEQ,jdbcType=DOUBLE}, CX_BDATE = TO_DATE (#{item.CX_BDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CX_EDATE = TO_DATE (#{item.CX_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		ZC_EDATE = TO_DATE (#{item.ZC_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		ZC_BDATE = TO_DATE (#{item.ZC_BDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		M_MDATE = TO_DATE (#{item.M_MDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		ZD_EDATE = TO_DATE (#{item.ZD_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		OS_EDATE = TO_DATE (#{item.OS_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		SE_EDATE = TO_DATE (#{item.SE_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CZ_EDATE = TO_DATE (#{item.CZ_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		DIFF_ETD =#{item.DIFF_ETD,jdbcType=DOUBLE}, PL_STATUS =#{item.PL_STATUS,jdbcType=VARCHAR},
+ 		DIFF_OSDATE =#{item.DIFF_OSDATE,jdbcType=DOUBLE}, PRO_WKSEQ = TO_DATE (#{item.PRO_WKSEQ,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		DIFF_ZCDATE =#{item.DIFF_ZCDATE,jdbcType=DOUBLE}, UP_USER ='DEV', UP_DATE = SYSDATE,
+ 		ZD_BDATE = TO_DATE (#{item.ZD_BDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		SE_BDATE = TO_DATE (#{item.SE_BDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		MATE_DATE = TO_DATE (#{item.MATE_DATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CFM_DATE1 = TO_DATE (#{item.CFM_DATE1,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CFM_DATE2 = TO_DATE (#{item.CFM_DATE2,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CX_EHOUR =#{item.CX_EHOUR,jdbcType=VARCHAR}, DIFF_HOURS =#{item.DIFF_HOURS,jdbcType=VARCHAR}, 
+ 		CAP_HOUR =#{item.CAP_HOUR,jdbcType=DOUBLE}, WK_HOURS =#{item.WK_HOURS,jdbcType=DOUBLE}, 
+ 		CZ2_BDATE = TO_DATE (#{item.CZ2_BDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		CZ2_EDATE = TO_DATE (#{item.CZ2_EDATE,jdbcType=VARCHAR}, 'YYYY/MM/DD'),
+ 		ZC_HOURS =#{item.ZC_HOURS,jdbcType=DOUBLE}
+ 		</set>
+		WHERE
+		PNO =#{item.pno,jdbcType=VARCHAR}
+		AND LNO =#{item.LNO,jdbcType=VARCHAR}
+		AND OD_NO =#{item.odNo,jdbcType=VARCHAR}
+		AND OD_LOT =#{item.odLot,jdbcType=VARCHAR}
+		</foreach>
+		</if>
+    </update>
+    
+    <select id="GETPNO"  resultType="String">
+        SELECT ${field} FROM DSPM21 WHERE PNO =#{PNO,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="refreshInfo" resultMap="PMINFO">
+		SELECT
+		A.OD_NO,A.OD_LOT,A.PLAN_SEQ,C.OD_LQTY,C.SH_MODEL,
+		A.WK_HOURS,A.CX_EHOUR,TO_CHAR(A.CX_EDATE,'YYYY/MM/DD') CX_EDATE,
+		TO_CHAR(C.RGAC,'YYYY/MM/DD') RGAC,TO_CHAR(C.OGAC,'YYYY/MM/DD') OGAC,
+		TO_CHAR (DECODE (C.OGAC, NULL, C.RGAC, C.OGAC),
+		'YYYY/MM/DD'
+		) ETD
+		FROM
+		DSPM321 A,
+		DSPM20 C
+		WHERE
+		A .PNO = C.PNO (+)
+		AND A .OD_NO = C.OD_NO (+)
+		AND A .OD_LOT = C.OD_LOT (+)
+		AND A .PNO =#{PNO,jdbcType=VARCHAR}
+		AND A .LNO =#{LNO,jdbcType=VARCHAR}
+		AND A .PLAN_SEQ &gt;= (
+		SELECT
+		NVL (MAX(PLAN_SEQ), 0)
+		FROM
+		DSPM321 T
+		WHERE
+		PNO =#{PNO,jdbcType=VARCHAR}
+		AND LNO  =#{LNO,jdbcType=VARCHAR}
+		AND PLAN_SEQ&lt;0
+		AND CX_EDATE IS NOT NULL
+		)
+		ORDER BY
+		A .PLAN_SEQ
+	</select>
+	
+	<!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.PM321ANDPM20" id="PMINFO">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="OD_NO" property="OD_NO" jdbcType="VARCHAR" />
+    	<result column="OD_LOT" property="OD_LOT" jdbcType="VARCHAR" />
+    	<result column="PLAN_SEQ" property="PLAN_SEQ" jdbcType="DOUBLE" />
+    	<result column="OD_LQTY" property="OD_LQTY" jdbcType="DOUBLE" />
+    	<result column="SH_MODEL" property="SH_MODEL" jdbcType="VARCHAR" />
+    	<result column="WK_HOURS" property="WK_HOURS" jdbcType="DOUBLE" />
+    	<result column="CX_EHOUR" property="CX_EHOUR" jdbcType="DOUBLE" />
+    	<result column="CX_EDATE" property="CX_EDATE" jdbcType="VARCHAR" />
+    	<result column="RGAC" property="RGAC" jdbcType="VARCHAR" />
+    	<result column="OGAC" property="OGAC" jdbcType="VARCHAR" />
+    	<result column="ETD" property="ETD" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getPM13" resultMap="PM13">
+    	SELECT PM_OUTPUT,SH_LEVEL,TR_OUTPUT,PM_UOUTPUT,PM_OUTPUT1 FROM DSPM13
+    	WHERE PNO=#{PNO,jdbcType=VARCHAR} AND EXISTS(
+    	SELECT * FROM DSPM21 WHERE PNO=#{PNO,jdbcType=VARCHAR} AND PROCID=DSPM13.PROCID)
+    	 AND SH_NO=#{SHNO,jdbcType=VARCHAR}
+    	 AND LNO=#{LNO,jdbcType=VARCHAR} 
+    	 ORDER BY LORD
+    </select>
+    
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.DSPM13" id="PM13">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="PM_OUTPUT" property="PM_OUTPUT" jdbcType="VARCHAR" />
+    	<result column="SH_LEVEL" property="SH_LEVEL" jdbcType="VARCHAR" />
+    	<result column="TR_OUTPUT" property="TR_OUTPUT" jdbcType="VARCHAR" />
+    	<result column="PM_UOUTPUT" property="PM_UOUTPUT" jdbcType="VARCHAR" />
+    	<result column="PM_OUTPUT1" property="PM_OUTPUT1" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getPM121" resultMap="PM121">
+    	SELECT B.SH_PMOUT SH_PMOUT,B.ZC_PMOUT ZC_PMOUT FROM DSPM121 A,DSPM125 B 
+    	WHERE A.SH_SCNO=B.SH_SCNO AND SH_NO=#{SHNO,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.PM121" id="PM121">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="SH_PMOUT" property="SH_PMOUT" jdbcType="VARCHAR" />
+    	<result column="ZC_PMOUT" property="ZC_PMOUT" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="CompareDate"  resultType="Integer">
+        SELECT TO_DATE(#{DT1,jdbcType=VARCHAR},'YYYY/MM/DD')-TO_DATE(#{DT2,jdbcType=VARCHAR},'YYYY/MM/DD') DT FROM DUAL
+	</select>
+	
+	<select id="C06"  resultType="String">
+        SELECT PCHAR1 FROM DSPM01 WHERE PID='C06' AND SELECTED='Y'
+	</select>
+	
+	<select id="B01"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B01' AND SELECTED='Y'
+	</select>
+	
+	<select id="B02"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B02' AND SELECTED='Y'
+	</select>
+	
+	<select id="B03"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B03' AND SELECTED='Y'
+	</select>
+	
+	<select id="B05"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B05' AND SELECTED='Y'
+	</select>
+	
+	<select id="B12"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B12' AND SELECTED='Y'
+	</select>
+	
+	<select id="B12_2"  resultType="String">
+        SELECT PNUM2 FROM DSPM01 WHERE PID='B12' AND SELECTED='Y'
+	</select>
+	
+	<select id="B14"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B14' AND SELECTED='Y'
+	</select>
+	
+	<select id="B30"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B30' AND SELECTED='Y'
+	</select>
+	
+	<select id="B07"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='B07' AND SELECTED='Y'
+	</select>
+	
+	<select id="A16_1"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='A16' AND SELECTED='Y'
+	</select>
+	
+	<select id="A16_2"  resultType="String">
+        SELECT PNUM2 FROM DSPM01 WHERE PID='A16' AND SELECTED='Y'
+	</select>
+	
+	<select id="E03"  resultType="String">
+        SELECT PNUM1 FROM DSPM01 WHERE PID='E03' AND SELECTED='Y'
+	</select>
+	
+	<select id="ADDDate"  resultType="String">
+        SELECT TO_CHAR(TO_DATE(#{DT,jdbcType=VARCHAR},'YYYY/MM/DD')+#{DAYS,jdbcType=DECIMAL},'YYYY/MM/DD') DT FROM DUAL
+	</select>
+    
+    <select id="getSHNOLPCT" resultType="Double">
+    	SELECT NVL(MAX(L_PCT),0) L_PCT FROM DSPM141 WHERE
+    	 LNO=#{LNO,jdbcType=VARCHAR} AND PROCID=#{PROCID,jdbcType=VARCHAR} 
+    	 AND SHOE_ID=#{SHNO,jdbcType=VARCHAR} AND P_TYPE='2'
+    </select>
+    
+    <select id="getPMHOURS" resultMap="SC17">
+		SELECT WK_T,WK_ADDT,TO_CHAR(WK_DATE,'YYYY/MM/DD') WK_DATE FROM DSSC17 WHERE 
+		LINE_NO=#{LNO,jdbcType=VARCHAR} AND WK_DATE&gt;=TO_DATE(#{WKDATE,jdbcType=VARCHAR},'YYYY/MM/DD') 
+		ORDER BY WK_DATE
+	</select>
+	
+	<select id="getPMHOURS2" resultMap="SC17">
+		SELECT WK_T,WK_ADDT,TO_CHAR(WK_DATE,'YYYY/MM/DD') WK_DATE FROM DSSC17 WHERE 
+		LINE_NO=#{LNO,jdbcType=VARCHAR} AND WK_DATE&lt;=TO_DATE(#{WKDATE,jdbcType=VARCHAR},'YYYY/MM/DD') 
+		ORDER BY WK_DATE DESC
+	</select>
+	
+	<!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.DSSC17" id="SC17">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="WK_T" property="WK_T" jdbcType="VARCHAR" />
+    	<result column="WK_ADDT" property="WK_ADDT" jdbcType="VARCHAR" />
+    	<result column="WK_DATE" property="WK_DATE" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getPM141" resultMap="pm141">
+		SELECT NVL(SUM(L_HOURS),0) LHOURS,MAX(L_PCT) L_PCT,MAX(CXDATE) CXDATE FROM DSPM141 
+		WHERE LNO=#{LNO,jdbcType=VARCHAR} AND PROCID=#{PROCID,jdbcType=VARCHAR} 
+    	AND SHOE_ID=#{SHNO,jdbcType=VARCHAR} AND P_TYPE='2'
+	</select>
+	
+	<!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.DSPM141" id="pm141">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="LHOURS" property="LHOURS" jdbcType="DOUBLE" />
+    	<result column="L_PCT" property="L_PCT" jdbcType="DOUBLE" />
+    	<result column="CXDATE" property="CXDATE" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getPM20OC" resultMap="pm20oc">
+		SELECT 
+		TO_CHAR(OD_ACDAT,'YYYY/MM/DD') OD_ACDAT,OD_FROM
+		FROM DSPM20 WHERE PNO=#{PNO,jdbcType=VARCHAR} AND OD_NO=#{OD_NO,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- resultMap中的type表示返回什么类型的对象 -->
+    <resultMap type="com.cn.hansontable.domain.PM20OC" id="pm20oc">
+        <!-- property 表示CXDATE中的属性； column 表示表中的列名 -->
+    	<result column="OD_ACDAT" property="OD_ACDAT" jdbcType="VARCHAR" />
+    	<result column="OD_FROM" property="OD_FROM" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getWorkDays"  resultType="String">
+        SELECT WORK_DAYS FROM DSPM06 WHERE SH_NO in(SELECT SH_NO FROM DSOD00 WHERE OD_NO=#{OD_NO,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="getPM07MAXDATE"  resultType="String">
+        SELECT TO_CHAR(MAX_DATE,'YYYY/MM/DD') MAX_DATE FROM DSPM07 WHERE OD_NO=#{OD_NO,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getPM08MAXDATE"  resultType="String">
+        SELECT TO_CHAR(MAX_DATE,'YYYY/MM/DD') MAX_DATE FROM DSPM07 WHERE OD_NO=#{OD_NO,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 批量更新DSPM321 -->
+    <update id="updateDSPM321" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="begin"
+                 close=";end;" separator=";">
+            update DSPM321
+            <set>
+                LNO = #{item.LNO,jdbcType=VARCHAR},PLAN_SEQ=#{item.PLAN_SEQ,jdbcType=DOUBLE}
+            </set>
+            where PNO = #{item.pno,jdbcType=VARCHAR} AND OD_NO = #{item.odNo,jdbcType=VARCHAR} AND OD_LOT = #{item.odLot,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>
